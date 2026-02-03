@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="sr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Moj Motivator</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="icon" type="image/png" href="images/clover.png" />
+  </head>
+  <body>
+    <div class="app-container">
+      <button
+        id="theme-toggle"
+        class="icon-only-btn"
+        aria-label="Toggle dark mode"
+      >
+        <span id="theme-icon">🌙</span>
+      </button>
+      <h1>🌟 Moj Motivator</h1>
+      <div id="display-area">
+        <p id="poruka">Klikni na dugme za dozu inspiracije!</p>
+      </div>
+
+      <div class="input-group">
+        <label for="nova-poruka" class="sr-only">Tvoja poruka:</label>
+        <input
+          type="text"
+          id="nova-poruka"
+          placeholder="Napiši šta te motiviše..."
+        />
+        <button id="add-btn">Dodaj</button>
+      </div>
+
+      <button id="generate-btn">Nova Poruka 🚀</button>
+    </div>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>

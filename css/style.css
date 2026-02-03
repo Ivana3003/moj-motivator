@@ -1,0 +1,176 @@
+:root {
+  /* Svetle boje (default) */
+  --bg-body: #f0f2f5;
+  --bg-app: #ffffff;
+  --text-main: #1a1a1a;
+  --text-muted: #495057;
+  --bg-display: #f8f9fa;
+  --border-color: #dee2e6;
+}
+
+[data-theme="dark"] {
+  /* Tamne boje */
+  --bg-body: #121212;
+  --bg-app: #1e1e1e;
+  --text-main: #ffffff;
+  --text-muted: #b0b0b0;
+  --bg-display: #2d2d2d;
+  --border-color: #404040;
+}
+/* Osnovni reset i fontovi */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* Kontejner aplikacije koji imitira mobilni ekran */
+.app-container {
+  background: var(--bg-app);
+  color: var(--text-main);
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  border: 1px solid #333; /* Diskretna ivica */
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Duboka senka za "floating" efekat */
+  text-align: center;
+}
+
+h1 {
+  color: var(--text-main);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+/* Area gde se prikazuje poruka */
+#display-area {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 16px;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+  border: 1px dashed #dee2e6;
+}
+
+#poruka {
+  font-size: 1.1rem;
+  color: #495057;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* Grupa za unos */
+.input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+input[type="text"] {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+input[type="text"]:focus {
+  border-color: #007bff;
+}
+
+/* Dugmići */
+button {
+  cursor: pointer;
+  border: none;
+  font-weight: 600;
+  transition:
+    transform 0.1s,
+    opacity 0.2s;
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+#add-btn {
+  background-color: #28a745;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 12px;
+}
+
+#generate-btn {
+  background-color: #007bff;
+  color: white;
+  width: 100%;
+  padding: 15px;
+  border-radius: 12px;
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+/* Sakrivanje labele za ekran, ali ostavljanje za screen readere */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.icon-only-btn {
+  background: none; /* Uklanja sivu pozadinu dugmeta */
+  border: none;
+  font-size: 1.5rem; /* Povećava ikonu */
+  cursor: pointer;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  outline: none;
+}
+
+.icon-only-btn:hover {
+  transform: scale(1.1); /* Blago povećanje kad se pređe mišem */
+}
+
+.icon-only-btn:active {
+  transform: scale(0.9); /* Efekat pritiska */
+}
+/* Responsive dizajn za manje ekrane */
+@media (max-width: 480px) {
+  .app-container {
+    padding: 1.5rem;
+  }
+
+  #display-area {
+    min-height: 100px;
+  }
+
+  button {
+    font-size: 0.9rem;
+  }
+}
