@@ -18,7 +18,6 @@
         class="icon-only-btn"
         aria-label="Toggle dark mode"
       >
-        <span id="theme-icon">🌙</span>
       </button>
       <h1>🌟 Moj Motivator</h1>
       <div id="display-area">
@@ -31,12 +30,14 @@
           type="text"
           id="nova-poruka"
           placeholder="Napiši šta te motiviše..."
+          maxlength="150"
         />
         <button id="add-btn">Dodaj</button>
       </div>
 
       <button id="generate-btn">Nova Poruka 🚀</button>
     </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="js/main.js"></script>
   </body>

@@ -6,6 +6,11 @@
   --text-muted: #495057;
   --bg-display: #f8f9fa;
   --border-color: #dee2e6;
+  --border-app: #dee2e6;
+  --border-input: #e9ecef;
+  --shadow: rgba(0, 0, 0, 0.12);
+  --accent: #007bff;
+  --accent-add: #28a745;
 }
 
 [data-theme="dark"] {
@@ -16,6 +21,11 @@
   --text-muted: #b0b0b0;
   --bg-display: #2d2d2d;
   --border-color: #404040;
+  --border-app: #333333;
+  --border-input: #555555;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --accent: #4da3ff;
+  --accent-add: #34c759;
 }
 /* Osnovni reset i fontovi */
 * {
@@ -45,9 +55,9 @@ body {
   width: 100%;
   max-width: 400px;
   padding: 2rem;
-  border: 1px solid #333; /* Diskretna ivica */
+  border: 1px solid var(--border-app);
   border-radius: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Duboka senka za "floating" efekat */
+  box-shadow: 0 10px 30px var(--shadow); /* Duboka senka za "floating" efekat */
   text-align: center;
 }
 
@@ -59,7 +69,7 @@ h1 {
 
 /* Area gde se prikazuje poruka */
 #display-area {
-  background: #f8f9fa;
+  background: var(--bg-display);
   padding: 1.5rem;
   border-radius: 16px;
   min-height: 120px;
@@ -67,12 +77,12 @@ h1 {
   align-items: center;
   justify-content: center;
   margin-bottom: 2rem;
-  border: 1px dashed #dee2e6;
+  border: 1px dashed var(--border-color);
 }
 
 #poruka {
   font-size: 1.1rem;
-  color: #495057;
+  color: var(--text-muted);
   font-style: italic;
   line-height: 1.5;
 }
@@ -87,14 +97,16 @@ h1 {
 input[type="text"] {
   flex: 1;
   padding: 12px;
-  border: 2px solid #e9ecef;
+  border: 2px solid var(--border-input);
   border-radius: 12px;
+  background: var(--bg-display);
+  color: var(--text-main);
   outline: none;
   transition: border-color 0.3s;
 }
 
 input[type="text"]:focus {
-  border-color: #007bff;
+  border-color: var(--accent);
 }
 
 /* Dugmići */
@@ -112,14 +124,14 @@ button:active {
 }
 
 #add-btn {
-  background-color: #28a745;
+  background-color: var(--accent-add);
   color: white;
   padding: 12px 20px;
   border-radius: 12px;
 }
 
 #generate-btn {
-  background-color: #007bff;
+  background-color: var(--accent);
   color: white;
   width: 100%;
   padding: 15px;
@@ -146,11 +158,16 @@ button:active {
   font-size: 1.5rem; /* Povećava ikonu */
   cursor: pointer;
   padding: 10px;
+  color: var(--text-main);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: transform 0.2s ease;
-  outline: none;
+}
+
+.icon-only-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  border-radius: 8px;
 }
 
 .icon-only-btn:hover {
@@ -160,6 +177,32 @@ button:active {
 .icon-only-btn:active {
   transform: scale(0.9); /* Efekat pritiska */
 }
+/* Toast notifikacija */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--bg-app);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 12px 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px var(--shadow);
+  font-size: 0.95rem;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+  z-index: 100;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 /* Responsive dizajn za manje ekrane */
 @media (max-width: 480px) {
   .app-container {

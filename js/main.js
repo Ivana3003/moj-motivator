@@ -6,24 +6,37 @@ let poruke = [
   "Početna tačka svakog uspeha je želja.",
 ];
 
+const MAX_DUZINA_PORUKE = 150;
+
 // 2. SELEKTORI
 const prikazPoruke = document.getElementById("poruka");
 const dugmeGenerisi = document.getElementById("generate-btn");
 const unosNovePoruke = document.getElementById("nova-poruka");
 const dugmeDodaj = document.getElementById("add-btn");
 const dugmeTema = document.getElementById("theme-toggle");
+const toast = document.getElementById("toast");
 
-// 3. FUNKCIJA ZA TEMU
+// 3. TOAST NOTIFIKACIJA
+let toastTimeout;
+const prikaziToast = (poruka) => {
+  toast.textContent = poruka;
+  toast.classList.add("show");
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2500);
+};
+
+// 4. FUNKCIJA ZA TEMU
 const postaviTemu = (tema) => {
   document.documentElement.setAttribute("data-theme", tema);
-  if (tema === "dark") {
-    document.body.classList.add("dark-mode");
-  } else {
-    document.body.classList.remove("dark-mode");
-  }
 
   // Pamćenje u memoriji
-  localStorage.setItem("izabrana-tema", tema);
+  try {
+    localStorage.setItem("izabrana-tema", tema);
+  } catch {
+    // localStorage nije dostupan (privatni mod)
+  }
 
   // REŠENJE ZA IKONU: Ubacujemo potpuno novi HTML unutar dugmeta
   // Na ovaj način Lucide uvek vidi novi "i" tag i ispravno ga crta
@@ -36,7 +49,7 @@ const postaviTemu = (tema) => {
   }
 };
 
-// 4. LOGIKA ZA PORUKE
+// 5. LOGIKA ZA PORUKE
 const prikaziNasumicnuPoruku = () => {
   const index = Math.floor(Math.random() * poruke.length);
   prikazPoruke.innerText = poruke[index];
@@ -44,18 +57,31 @@ const prikaziNasumicnuPoruku = () => {
 
 const dodajNovuPoruku = () => {
   let tekst = unosNovePoruke.value.trim();
-  if (tekst !== "") {
-    tekst = tekst.charAt(0).toUpperCase() + tekst.slice(1);
-    poruke.push(tekst);
-    unosNovePoruke.value = "";
-    prikazPoruke.innerText = tekst;
-    alert("Poruka uspešno dodata!");
-  } else {
-    alert("Polje ne sme biti prazno!");
+
+  if (tekst === "") {
+    prikaziToast("Polje ne sme biti prazno!");
+    return;
   }
+
+  if (tekst.length > MAX_DUZINA_PORUKE) {
+    prikaziToast(`Poruka ne sme biti duža od ${MAX_DUZINA_PORUKE} karaktera.`);
+    return;
+  }
+
+  tekst = tekst.charAt(0).toUpperCase() + tekst.slice(1);
+
+  if (poruke.includes(tekst)) {
+    prikaziToast("Ova poruka već postoji!");
+    return;
+  }
+
+  poruke.push(tekst);
+  unosNovePoruke.value = "";
+  prikazPoruke.innerText = tekst;
+  prikaziToast("Poruka uspešno dodata!");
 };
 
-// 5. EVENT LISTENERS
+// 6. EVENT LISTENERS
 dugmeGenerisi.addEventListener("click", prikaziNasumicnuPoruku);
 dugmeDodaj.addEventListener("click", dodajNovuPoruku);
 
@@ -71,8 +97,13 @@ dugmeTema.addEventListener("click", () => {
   postaviTemu(novaTema);
 });
 
-// 6. INICIJALIZACIJA (Pokretanje pri učitavanju)
+// 7. INICIJALIZACIJA (Pokretanje pri učitavanju)
 document.addEventListener("DOMContentLoaded", () => {
-  const sacuvanaTema = localStorage.getItem("izabrana-tema") || "light";
+  let sacuvanaTema = "light";
+  try {
+    sacuvanaTema = localStorage.getItem("izabrana-tema") || "light";
+  } catch {
+    // localStorage nije dostupan
+  }
   postaviTemu(sacuvanaTema);
 });
