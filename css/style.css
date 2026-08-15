@@ -188,6 +188,23 @@ button:active {
   font-size: 0.95rem;
 }
 
+.daily-focus-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-shrink: 0;
+}
+
+#daily-focus-delete {
+  width: auto;
+  padding: 0.4rem 0.6rem;
+  background: transparent;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  border-radius: 8px;
+  font-size: 0.75rem;
+}
+
 .user-messages {
   margin: 1.5rem 0;
   padding: 1rem;
