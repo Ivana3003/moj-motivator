@@ -1,3 +1,5 @@
+"use strict";
+
 (function (root, factory) {
   const logic = factory();
 
