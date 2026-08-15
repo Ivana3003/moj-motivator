@@ -123,6 +123,12 @@ button:active {
   transform: scale(0.95);
 }
 
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
 #add-btn {
   background-color: var(--accent-add);
   color: white;

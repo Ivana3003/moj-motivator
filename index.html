@@ -17,9 +17,11 @@
         id="theme-toggle"
         class="icon-only-btn"
         aria-label="Toggle dark mode"
+        aria-pressed="false"
+        type="button"
       ></button>
       <h1>🌟 Moj Motivator</h1>
-      <div id="display-area">
+      <div id="display-area" aria-live="polite" aria-atomic="true">
         <p id="poruka">Klikni na dugme za dozu inspiracije!</p>
       </div>
 
@@ -57,7 +59,7 @@
           placeholder="Napiši šta te motiviše..."
           maxlength="150"
         />
-        <button id="add-btn">Dodaj</button>
+        <button id="add-btn" type="button">Dodaj</button>
       </div>
 
       <section class="user-messages" aria-labelledby="user-messages-title">
@@ -74,7 +76,7 @@
         <ul id="user-messages-list" class="user-messages-list"></ul>
       </section>
 
-      <button id="generate-btn">Nova Poruka 🚀</button>
+      <button id="generate-btn" type="button">Nova Poruka 🚀</button>
     </div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <script src="https://unpkg.com/lucide@latest"></script>
