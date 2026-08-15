@@ -1,0 +1,20 @@
+{
+  "name": "moj-motivator",
+  "version": "1.0.0",
+  "description": "A browser-based motivational focus app with persistent personal messages.",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "keywords": [
+    "motivation",
+    "productivity",
+    "javascript",
+    "localstorage"
+  ],
+  "author": "Ivana Tatić",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^30.3.0"
+  }
+}

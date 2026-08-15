@@ -39,10 +39,13 @@
         </form>
         <div id="daily-focus-status" class="daily-focus-status" hidden>
           <span id="daily-focus-text"></span>
-          <label class="focus-complete">
-            <input type="checkbox" id="daily-focus-complete" />
-            Završeno
-          </label>
+          <div class="daily-focus-actions">
+            <label class="focus-complete">
+              <input type="checkbox" id="daily-focus-complete" />
+              Završeno
+            </label>
+            <button type="button" id="daily-focus-delete">Obriši</button>
+          </div>
         </div>
       </section>
 
@@ -75,6 +78,7 @@
     </div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/message-logic.js"></script>
     <script src="js/main.js"></script>
   </body>
 </html>

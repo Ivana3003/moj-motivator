@@ -34,6 +34,8 @@ const unosDnevnogFokusa = document.getElementById("daily-focus-input");
 const statusDnevnogFokusa = document.getElementById("daily-focus-status");
 const tekstDnevnogFokusa = document.getElementById("daily-focus-text");
 const fokusZavrsen = document.getElementById("daily-focus-complete");
+const dugmeObrisiDnevniFokus = document.getElementById("daily-focus-delete");
+const messageLogic = window.MojMotivatorLogic;
 
 const DAILY_FOCUS_KEY = "moj-motivator-daily-focus";
 const MAX_DUZINA_FOKUSA = 120;
@@ -73,14 +75,9 @@ const postaviTemu = (tema) => {
 
 // 5. LOGIKA ZA PORUKE
 const prikaziNasumicnuPoruku = () => {
-  if (poruke.length === 0) return;
+  poslednjaPoruka = messageLogic.pickNextMessage(poruke, poslednjaPoruka);
+  if (!poslednjaPoruka) return;
 
-  const dostupnePoruke = poruke.filter(
-    (poruka) => poruka !== poslednjaPoruka,
-  );
-  const izvorPoruka = dostupnePoruke.length ? dostupnePoruke : poruke;
-  const index = Math.floor(Math.random() * izvorPoruka.length);
-  poslednjaPoruka = izvorPoruka[index];
   prikazPoruke.innerText = poslednjaPoruka;
 
   try {
@@ -91,21 +88,19 @@ const prikaziNasumicnuPoruku = () => {
 };
 
 const dodajNovuPoruku = () => {
-  let tekst = unosNovePoruke.value.trim();
+  const rezultat = messageLogic.normalizeMessage(
+    unosNovePoruke.value,
+    MAX_DUZINA_PORUKE,
+  );
 
-  if (tekst === "") {
-    prikaziToast("Polje ne sme biti prazno!");
+  if (!rezultat.ok) {
+    prikaziToast(rezultat.error);
     return;
   }
 
-  if (tekst.length > MAX_DUZINA_PORUKE) {
-    prikaziToast(`Poruka ne sme biti duža od ${MAX_DUZINA_PORUKE} karaktera.`);
-    return;
-  }
+  const tekst = rezultat.value;
 
-  tekst = tekst.charAt(0).toUpperCase() + tekst.slice(1);
-
-  if (poruke.includes(tekst)) {
+  if (messageLogic.isDuplicateMessage(tekst, poruke)) {
     prikaziToast("Ova poruka već postoji!");
     return;
   }
@@ -290,21 +285,21 @@ const promeniOmiljenuPoruku = (poruka) => {
 };
 
 const sacuvajIzmenjenuPoruku = (index, novaPoruka) => {
-  const tekst = novaPoruka.trim();
-  if (!tekst) {
-    prikaziToast("Poruka ne sme biti prazna!");
+  const rezultat = messageLogic.normalizeMessage(
+    novaPoruka,
+    MAX_DUZINA_PORUKE,
+  );
+
+  if (!rezultat.ok) {
+    prikaziToast(rezultat.error);
     return;
   }
 
-  if (tekst.length > MAX_DUZINA_PORUKE) {
-    prikaziToast(`Poruka ne sme biti duža od ${MAX_DUZINA_PORUKE} karaktera.`);
-    return;
-  }
-
-  const formatiranaPoruka = tekst.charAt(0).toUpperCase() + tekst.slice(1);
-  const postojiDuplikat = poruke.some(
-    (poruka, porukaIndex) =>
-      poruka === formatiranaPoruka && poruka !== korisnickePoruke[index],
+  const formatiranaPoruka = rezultat.value;
+  const postojiDuplikat = messageLogic.isDuplicateMessage(
+    formatiranaPoruka,
+    poruke,
+    korisnickePoruke[index],
   );
 
   if (postojiDuplikat) {
@@ -421,6 +416,16 @@ const azurirajStatusFokusa = () => {
   }
 };
 
+const obrisiDnevniFokus = () => {
+  try {
+    localStorage.removeItem(DAILY_FOCUS_KEY);
+    prikaziDnevniFokus(null);
+    prikaziToast("Dnevni fokus je obrisan.");
+  } catch {
+    prikaziToast("Dnevni fokus nije mogao biti obrisan.");
+  }
+};
+
 const ucitajFilterOmiljenih = () => {
   try {
     prikaziSamoOmiljene =
@@ -438,6 +443,7 @@ dugmeGenerisi.addEventListener("click", prikaziNasumicnuPoruku);
 dugmeDodaj.addEventListener("click", dodajNovuPoruku);
 dnevniFokusForma.addEventListener("submit", sacuvajDnevniFokus);
 fokusZavrsen.addEventListener("change", azurirajStatusFokusa);
+dugmeObrisiDnevniFokus.addEventListener("click", obrisiDnevniFokus);
 unosDnevnogFokusa.addEventListener("beforeinput", (event) => {
   if (event.inputType !== "insertFromPaste" || typeof event.data !== "string") {
     return;
