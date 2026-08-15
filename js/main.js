@@ -1,3 +1,5 @@
+"use strict";
+
 // 1. PODACI
 let poruke = [
   "Izgleda nemoguće, dokle god se ne završi.",
