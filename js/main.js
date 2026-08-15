@@ -8,10 +8,14 @@ let poruke = [
 
 const podrazumevanePoruke = [...poruke];
 let korisnickePoruke = [];
+let omiljenePoruke = [];
+let prikaziSamoOmiljene = false;
 let indeksPorukeZaIzmenu = null;
 
 const MAX_DUZINA_PORUKE = 150;
 const USER_MESSAGES_KEY = "moj-motivator-user-messages";
+const USER_FAVORITES_KEY = "moj-motivator-user-message-favorites";
+const FAVORITES_FILTER_KEY = "moj-motivator-favorites-filter";
 
 // 2. SELEKTORI
 const prikazPoruke = document.getElementById("poruka");
@@ -22,6 +26,7 @@ const dugmeTema = document.getElementById("theme-toggle");
 const toast = document.getElementById("toast");
 const listaKorisnickihPoruka = document.getElementById("user-messages-list");
 const praznaListaPoruka = document.getElementById("user-messages-empty");
+const filterOmiljenih = document.getElementById("favorites-only");
 const dnevniFokusForma = document.getElementById("daily-focus-form");
 const unosDnevnogFokusa = document.getElementById("daily-focus-input");
 const statusDnevnogFokusa = document.getElementById("daily-focus-status");
@@ -130,14 +135,52 @@ const ucitajKorisnickePoruke = () => {
     prikaziToast("Sačuvane poruke nisu mogle biti učitane.");
   }
 
+  ucitajOmiljenePoruke();
+
   prikaziKorisnickePoruke();
+};
+
+const sacuvajOmiljenePoruke = () => {
+  try {
+    localStorage.setItem(USER_FAVORITES_KEY, JSON.stringify(omiljenePoruke));
+    return true;
+  } catch {
+    prikaziToast("Omiljene poruke nisu mogle biti sačuvane.");
+    return false;
+  }
+};
+
+const ucitajOmiljenePoruke = () => {
+  try {
+    const sacuvaneOmiljene = JSON.parse(
+      localStorage.getItem(USER_FAVORITES_KEY) || "[]",
+    );
+
+    if (Array.isArray(sacuvaneOmiljene)) {
+      omiljenePoruke = sacuvaneOmiljene.filter(
+        (poruka, index, svePoruke) =>
+          korisnickePoruke.includes(poruka) &&
+          svePoruke.indexOf(poruka) === index,
+      );
+    }
+  } catch {
+    omiljenePoruke = [];
+    prikaziToast("Omiljene poruke nisu mogle biti učitane.");
+  }
 };
 
 const prikaziKorisnickePoruke = () => {
   listaKorisnickihPoruka.innerHTML = "";
-  praznaListaPoruka.hidden = korisnickePoruke.length > 0;
+  const porukeZaPrikaz = prikaziSamoOmiljene
+    ? korisnickePoruke.filter((poruka) => omiljenePoruke.includes(poruka))
+    : korisnickePoruke;
+  praznaListaPoruka.hidden = porukeZaPrikaz.length > 0;
+  praznaListaPoruka.textContent = prikaziSamoOmiljene
+    ? "Još nemaš omiljenih poruka."
+    : "Još nemaš sačuvanih poruka.";
 
-  korisnickePoruke.forEach((poruka, index) => {
+  porukeZaPrikaz.forEach((poruka) => {
+    const index = korisnickePoruke.indexOf(poruka);
     const item = document.createElement("li");
     item.className = "user-message-item";
 
@@ -180,6 +223,19 @@ const prikaziKorisnickePoruke = () => {
     const actions = document.createElement("div");
     actions.className = "user-message-actions";
 
+    const favoriteButton = document.createElement("button");
+    const jesteOmiljena = omiljenePoruke.includes(poruka);
+    favoriteButton.type = "button";
+    favoriteButton.className = `favorite-btn${jesteOmiljena ? " is-favorite" : ""}`;
+    favoriteButton.textContent = jesteOmiljena ? "★" : "☆";
+    favoriteButton.setAttribute(
+      "aria-label",
+      jesteOmiljena ? "Ukloni iz omiljenih" : "Dodaj u omiljene",
+    );
+    favoriteButton.addEventListener("click", () =>
+      promeniOmiljenuPoruku(poruka),
+    );
+
     const editButton = document.createElement("button");
     editButton.type = "button";
     editButton.className = "message-edit-btn";
@@ -195,10 +251,27 @@ const prikaziKorisnickePoruke = () => {
     deleteButton.textContent = "Obriši";
     deleteButton.addEventListener("click", () => obrisiKorisnickuPoruku(index));
 
-    actions.append(editButton, deleteButton);
+    actions.append(favoriteButton, editButton, deleteButton);
     item.append(text, actions);
     listaKorisnickihPoruka.append(item);
   });
+};
+
+const promeniOmiljenuPoruku = (poruka) => {
+  if (omiljenePoruke.includes(poruka)) {
+    omiljenePoruke = omiljenePoruke.filter((omiljena) => omiljena !== poruka);
+  } else {
+    omiljenePoruke.push(poruka);
+  }
+
+  if (sacuvajOmiljenePoruke()) {
+    prikaziKorisnickePoruke();
+    prikaziToast(
+      omiljenePoruke.includes(poruka)
+        ? "Poruka je dodata u omiljene."
+        : "Poruka je uklonjena iz omiljenih.",
+    );
+  }
 };
 
 const sacuvajIzmenjenuPoruku = (index, novaPoruka) => {
@@ -226,10 +299,15 @@ const sacuvajIzmenjenuPoruku = (index, novaPoruka) => {
 
   const staraPoruka = korisnickePoruke[index];
   korisnickePoruke[index] = formatiranaPoruka;
+  const bilaJeOmiljena = omiljenePoruke.includes(staraPoruka);
+  omiljenePoruke = omiljenePoruke.filter(
+    (omiljena) => omiljena !== staraPoruka,
+  );
+  if (bilaJeOmiljena) omiljenePoruke.push(formatiranaPoruka);
   const porukaIndex = poruke.indexOf(staraPoruka);
   if (porukaIndex !== -1) poruke[porukaIndex] = formatiranaPoruka;
 
-  if (sacuvajKorisnickePoruke()) {
+  if (sacuvajKorisnickePoruke() && sacuvajOmiljenePoruke()) {
     indeksPorukeZaIzmenu = null;
     prikaziKorisnickePoruke();
     prikaziToast("Poruka je izmenjena!");
@@ -245,10 +323,13 @@ const obrisiKorisnickuPoruku = (index) => {
   if (!window.confirm("Da li želiš da obrišeš ovu poruku?")) return;
 
   const [obrisanaPoruka] = korisnickePoruke.splice(index, 1);
+  omiljenePoruke = omiljenePoruke.filter(
+    (omiljena) => omiljena !== obrisanaPoruka,
+  );
   const porukaIndex = poruke.indexOf(obrisanaPoruka);
   if (porukaIndex !== -1) poruke.splice(porukaIndex, 1);
 
-  if (sacuvajKorisnickePoruke()) {
+  if (sacuvajKorisnickePoruke() && sacuvajOmiljenePoruke()) {
     prikaziKorisnickePoruke();
     prikaziToast("Poruka je obrisana.");
   }
@@ -325,6 +406,18 @@ const azurirajStatusFokusa = () => {
   }
 };
 
+const ucitajFilterOmiljenih = () => {
+  try {
+    prikaziSamoOmiljene =
+      JSON.parse(localStorage.getItem(FAVORITES_FILTER_KEY) || "false") ===
+      true;
+    filterOmiljenih.checked = prikaziSamoOmiljene;
+  } catch {
+    prikaziSamoOmiljene = false;
+    filterOmiljenih.checked = false;
+  }
+};
+
 // 6. EVENT LISTENERS
 dugmeGenerisi.addEventListener("click", prikaziNasumicnuPoruku);
 dugmeDodaj.addEventListener("click", dodajNovuPoruku);
@@ -384,6 +477,20 @@ document.addEventListener("DOMContentLoaded", () => {
     // localStorage nije dostupan
   }
   postaviTemu(sacuvanaTema);
+  ucitajFilterOmiljenih();
   ucitajDnevniFokus();
   ucitajKorisnickePoruke();
+});
+
+filterOmiljenih.addEventListener("change", () => {
+  prikaziSamoOmiljene = filterOmiljenih.checked;
+  try {
+    localStorage.setItem(
+      FAVORITES_FILTER_KEY,
+      JSON.stringify(prikaziSamoOmiljene),
+    );
+  } catch {
+    prikaziToast("Podešavanje filtera nije moglo biti sačuvano.");
+  }
+  prikaziKorisnickePoruke();
 });
