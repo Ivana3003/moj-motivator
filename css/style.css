@@ -140,6 +140,82 @@ button:active {
   margin-top: 10px;
 }
 
+.daily-focus {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: var(--bg-display);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  text-align: left;
+}
+
+.daily-focus h2 {
+  margin-bottom: 0.75rem;
+  color: var(--text-main);
+  font-size: 1.1rem;
+}
+
+#daily-focus-form {
+  display: flex;
+  gap: 8px;
+}
+
+#daily-focus-input {
+  min-width: 0;
+  flex: 1;
+  padding: 10px 12px;
+  background: var(--bg-app);
+  color: var(--text-main);
+  border: 1px solid var(--border-input);
+  border-radius: 10px;
+}
+
+#daily-focus-save {
+  flex-shrink: 0;
+  padding: 10px 12px;
+  background: var(--accent);
+  color: white;
+  border-radius: 10px;
+}
+
+.daily-focus-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 0.85rem;
+  color: var(--text-main);
+  font-size: 0.95rem;
+}
+
+.focus-complete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.focus-complete input {
+  accent-color: var(--accent);
+}
+
+@media (max-width: 420px) {
+  #daily-focus-form {
+    flex-direction: column;
+  }
+
+  #daily-focus-save {
+    width: 100%;
+  }
+
+  .daily-focus-status {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
 /* Sakrivanje labele za ekran, ali ostavljanje za screen readere */
 .sr-only {
   position: absolute;

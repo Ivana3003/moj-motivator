@@ -15,6 +15,14 @@ const unosNovePoruke = document.getElementById("nova-poruka");
 const dugmeDodaj = document.getElementById("add-btn");
 const dugmeTema = document.getElementById("theme-toggle");
 const toast = document.getElementById("toast");
+const dnevniFokusForma = document.getElementById("daily-focus-form");
+const unosDnevnogFokusa = document.getElementById("daily-focus-input");
+const statusDnevnogFokusa = document.getElementById("daily-focus-status");
+const tekstDnevnogFokusa = document.getElementById("daily-focus-text");
+const fokusZavrsen = document.getElementById("daily-focus-complete");
+
+const DAILY_FOCUS_KEY = "moj-motivator-daily-focus";
+const MAX_DUZINA_FOKUSA = 120;
 
 // 3. TOAST NOTIFIKACIJA
 let toastTimeout;
@@ -81,9 +89,114 @@ const dodajNovuPoruku = () => {
   prikaziToast("Poruka uspešno dodata!");
 };
 
+const danasnjiDatum = () => new Date().toISOString().slice(0, 10);
+
+const prikaziDnevniFokus = (fokus) => {
+  const postojiFokus = Boolean(fokus?.text);
+
+  statusDnevnogFokusa.hidden = !postojiFokus;
+  tekstDnevnogFokusa.textContent = postojiFokus ? fokus.text : "";
+  fokusZavrsen.checked = Boolean(fokus?.done);
+  unosDnevnogFokusa.value = postojiFokus ? fokus.text : "";
+};
+
+const ucitajDnevniFokus = () => {
+  try {
+    const sacuvanFokus = JSON.parse(localStorage.getItem(DAILY_FOCUS_KEY));
+
+    if (sacuvanFokus?.date === danasnjiDatum()) {
+      prikaziDnevniFokus(sacuvanFokus);
+      return;
+    }
+
+    localStorage.removeItem(DAILY_FOCUS_KEY);
+  } catch {
+    prikaziToast("Dnevni fokus nije mogao biti učitan.");
+  }
+
+  prikaziDnevniFokus(null);
+};
+
+const sacuvajDnevniFokus = (event) => {
+  event.preventDefault();
+  const tekst = unosDnevnogFokusa.value.trim();
+
+  if (!tekst) {
+    prikaziToast("Unesi fokus za danas.");
+    return;
+  }
+
+  if (tekst.length > MAX_DUZINA_FOKUSA) {
+    prikaziToast(`Fokus ne sme biti duži od ${MAX_DUZINA_FOKUSA} karaktera.`);
+    return;
+  }
+
+  const fokus = {
+    text: tekst,
+    date: danasnjiDatum(),
+    done: fokusZavrsen.checked,
+  };
+
+  try {
+    localStorage.setItem(DAILY_FOCUS_KEY, JSON.stringify(fokus));
+    prikaziDnevniFokus(fokus);
+    prikaziToast("Dnevni fokus je sačuvan!");
+  } catch {
+    prikaziToast("Dnevni fokus nije mogao biti sačuvan.");
+  }
+};
+
+const azurirajStatusFokusa = () => {
+  try {
+    const fokus = JSON.parse(localStorage.getItem(DAILY_FOCUS_KEY));
+
+    if (fokus?.date === danasnjiDatum()) {
+      fokus.done = fokusZavrsen.checked;
+      localStorage.setItem(DAILY_FOCUS_KEY, JSON.stringify(fokus));
+      prikaziDnevniFokus(fokus);
+    }
+  } catch {
+    prikaziToast("Status fokusa nije mogao biti sačuvan.");
+  }
+};
+
 // 6. EVENT LISTENERS
 dugmeGenerisi.addEventListener("click", prikaziNasumicnuPoruku);
 dugmeDodaj.addEventListener("click", dodajNovuPoruku);
+dnevniFokusForma.addEventListener("submit", sacuvajDnevniFokus);
+fokusZavrsen.addEventListener("change", azurirajStatusFokusa);
+unosDnevnogFokusa.addEventListener("beforeinput", (event) => {
+  if (event.inputType !== "insertFromPaste" || typeof event.data !== "string") {
+    return;
+  }
+
+  const selectionStart = unosDnevnogFokusa.selectionStart ?? 0;
+  const selectionEnd = unosDnevnogFokusa.selectionEnd ?? 0;
+  const nextValue =
+    unosDnevnogFokusa.value.slice(0, selectionStart) +
+    event.data +
+    unosDnevnogFokusa.value.slice(selectionEnd);
+
+  if (nextValue.length > MAX_DUZINA_FOKUSA) {
+    event.preventDefault();
+    prikaziToast(`Fokus ne sme biti duži od ${MAX_DUZINA_FOKUSA} karaktera.`);
+  }
+});
+
+unosDnevnogFokusa.addEventListener("paste", (event) => {
+  const pastedText = event.clipboardData?.getData("text") || "";
+  const selectionStart = unosDnevnogFokusa.selectionStart ?? 0;
+  const selectionEnd = unosDnevnogFokusa.selectionEnd ?? 0;
+  const nextValue =
+    unosDnevnogFokusa.value.slice(0, selectionStart) +
+    pastedText +
+    unosDnevnogFokusa.value.slice(selectionEnd);
+
+  if (nextValue.length > MAX_DUZINA_FOKUSA) {
+    event.preventDefault();
+    prikaziToast(`Fokus ne sme biti duži od ${MAX_DUZINA_FOKUSA} karaktera.`);
+  }
+});
 
 unosNovePoruke.addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
@@ -106,4 +219,5 @@ document.addEventListener("DOMContentLoaded", () => {
     // localStorage nije dostupan
   }
   postaviTemu(sacuvanaTema);
+  ucitajDnevniFokus();
 });
