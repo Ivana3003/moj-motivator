@@ -11,11 +11,13 @@ let korisnickePoruke = [];
 let omiljenePoruke = [];
 let prikaziSamoOmiljene = false;
 let indeksPorukeZaIzmenu = null;
+let poslednjaPoruka = null;
 
 const MAX_DUZINA_PORUKE = 150;
 const USER_MESSAGES_KEY = "moj-motivator-user-messages";
 const USER_FAVORITES_KEY = "moj-motivator-user-message-favorites";
 const FAVORITES_FILTER_KEY = "moj-motivator-favorites-filter";
+const LAST_MESSAGE_KEY = "moj-motivator-last-message";
 
 // 2. SELEKTORI
 const prikazPoruke = document.getElementById("poruka");
@@ -71,8 +73,21 @@ const postaviTemu = (tema) => {
 
 // 5. LOGIKA ZA PORUKE
 const prikaziNasumicnuPoruku = () => {
-  const index = Math.floor(Math.random() * poruke.length);
-  prikazPoruke.innerText = poruke[index];
+  if (poruke.length === 0) return;
+
+  const dostupnePoruke = poruke.filter(
+    (poruka) => poruka !== poslednjaPoruka,
+  );
+  const izvorPoruka = dostupnePoruke.length ? dostupnePoruke : poruke;
+  const index = Math.floor(Math.random() * izvorPoruka.length);
+  poslednjaPoruka = izvorPoruka[index];
+  prikazPoruke.innerText = poslednjaPoruka;
+
+  try {
+    sessionStorage.setItem(LAST_MESSAGE_KEY, poslednjaPoruka);
+  } catch {
+    // sessionStorage nije dostupan
+  }
 };
 
 const dodajNovuPoruku = () => {
@@ -480,6 +495,15 @@ document.addEventListener("DOMContentLoaded", () => {
   ucitajFilterOmiljenih();
   ucitajDnevniFokus();
   ucitajKorisnickePoruke();
+
+  try {
+    const sacuvanaPoslednjaPoruka = sessionStorage.getItem(LAST_MESSAGE_KEY);
+    if (poruke.includes(sacuvanaPoslednjaPoruka)) {
+      poslednjaPoruka = sacuvanaPoslednjaPoruka;
+    }
+  } catch {
+    // sessionStorage nije dostupan
+  }
 });
 
 filterOmiljenih.addEventListener("change", () => {
