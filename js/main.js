@@ -40,6 +40,55 @@ const messageLogic = window.MojMotivatorLogic;
 const DAILY_FOCUS_KEY = "moj-motivator-daily-focus";
 const MAX_DUZINA_FOKUSA = 120;
 
+const storageHelper = {
+  getStorage(type) {
+    return type === "session" ? sessionStorage : localStorage;
+  },
+
+  read(key, fallback, type = "local") {
+    try {
+      return this.getStorage(type).getItem(key) ?? fallback;
+    } catch {
+      return fallback;
+    }
+  },
+
+  readJson(key, fallback, type = "local") {
+    try {
+      const value = this.getStorage(type).getItem(key);
+      return value === null ? fallback : JSON.parse(value);
+    } catch {
+      return fallback;
+    }
+  },
+
+  write(key, value, type = "local") {
+    try {
+      this.getStorage(type).setItem(key, value);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  writeJson(key, value, type = "local") {
+    try {
+      return this.write(key, JSON.stringify(value), type);
+    } catch {
+      return false;
+    }
+  },
+
+  remove(key, type = "local") {
+    try {
+      this.getStorage(type).removeItem(key);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+};
+
 // 3. TOAST NOTIFIKACIJA
 let toastTimeout;
 const prikaziToast = (poruka) => {
@@ -56,12 +105,7 @@ const postaviTemu = (tema) => {
   document.documentElement.setAttribute("data-theme", tema);
   dugmeTema.setAttribute("aria-pressed", String(tema === "dark"));
 
-  // Pamćenje u memoriji
-  try {
-    localStorage.setItem("izabrana-tema", tema);
-  } catch {
-    // localStorage nije dostupan (privatni mod)
-  }
+  storageHelper.write("izabrana-tema", tema);
 
   // REŠENJE ZA IKONU: Ubacujemo potpuno novi HTML unutar dugmeta
   // Na ovaj način Lucide uvek vidi novi "i" tag i ispravno ga crta
@@ -81,11 +125,7 @@ const prikaziNasumicnuPoruku = () => {
 
   prikazPoruke.innerText = poslednjaPoruka;
 
-  try {
-    sessionStorage.setItem(LAST_MESSAGE_KEY, poslednjaPoruka);
-  } catch {
-    // sessionStorage nije dostupan
-  }
+  storageHelper.write(LAST_MESSAGE_KEY, poslednjaPoruka, "session");
 };
 
 const dodajNovuPoruku = () => {
@@ -116,32 +156,25 @@ const dodajNovuPoruku = () => {
 };
 
 const sacuvajKorisnickePoruke = () => {
-  try {
-    localStorage.setItem(USER_MESSAGES_KEY, JSON.stringify(korisnickePoruke));
-    return true;
-  } catch {
+  if (!storageHelper.writeJson(USER_MESSAGES_KEY, korisnickePoruke)) {
     prikaziToast("Poruke nisu mogle biti sačuvane.");
     return false;
   }
+  return true;
 };
 
 const ucitajKorisnickePoruke = () => {
-  try {
-    const sacuvanePoruke = JSON.parse(
-      localStorage.getItem(USER_MESSAGES_KEY) || "[]",
+  const sacuvanePoruke = storageHelper.readJson(USER_MESSAGES_KEY, null);
+  if (Array.isArray(sacuvanePoruke)) {
+    korisnickePoruke = sacuvanePoruke.filter(
+      (poruka, index, svePoruke) =>
+        typeof poruka === "string" &&
+        poruka.trim() &&
+        !podrazumevanePoruke.includes(poruka) &&
+        svePoruke.indexOf(poruka) === index,
     );
-
-    if (Array.isArray(sacuvanePoruke)) {
-      korisnickePoruke = sacuvanePoruke.filter(
-        (poruka, index, svePoruke) =>
-          typeof poruka === "string" &&
-          poruka.trim() &&
-          !podrazumevanePoruke.includes(poruka) &&
-          svePoruke.indexOf(poruka) === index,
-      );
-      poruke = [...podrazumevanePoruke, ...korisnickePoruke];
-    }
-  } catch {
+    poruke = [...podrazumevanePoruke, ...korisnickePoruke];
+  } else {
     korisnickePoruke = [];
     prikaziToast("Sačuvane poruke nisu mogle biti učitane.");
   }
@@ -152,29 +185,22 @@ const ucitajKorisnickePoruke = () => {
 };
 
 const sacuvajOmiljenePoruke = () => {
-  try {
-    localStorage.setItem(USER_FAVORITES_KEY, JSON.stringify(omiljenePoruke));
-    return true;
-  } catch {
+  if (!storageHelper.writeJson(USER_FAVORITES_KEY, omiljenePoruke)) {
     prikaziToast("Omiljene poruke nisu mogle biti sačuvane.");
     return false;
   }
+  return true;
 };
 
 const ucitajOmiljenePoruke = () => {
-  try {
-    const sacuvaneOmiljene = JSON.parse(
-      localStorage.getItem(USER_FAVORITES_KEY) || "[]",
+  const sacuvaneOmiljene = storageHelper.readJson(USER_FAVORITES_KEY, null);
+  if (Array.isArray(sacuvaneOmiljene)) {
+    omiljenePoruke = sacuvaneOmiljene.filter(
+      (poruka, index, svePoruke) =>
+        korisnickePoruke.includes(poruka) &&
+        svePoruke.indexOf(poruka) === index,
     );
-
-    if (Array.isArray(sacuvaneOmiljene)) {
-      omiljenePoruke = sacuvaneOmiljene.filter(
-        (poruka, index, svePoruke) =>
-          korisnickePoruke.includes(poruka) &&
-          svePoruke.indexOf(poruka) === index,
-      );
-    }
-  } catch {
+  } else {
     omiljenePoruke = [];
     prikaziToast("Omiljene poruke nisu mogle biti učitane.");
   }
@@ -356,18 +382,14 @@ const prikaziDnevniFokus = (fokus) => {
 };
 
 const ucitajDnevniFokus = () => {
-  try {
-    const sacuvanFokus = JSON.parse(localStorage.getItem(DAILY_FOCUS_KEY));
+  const sacuvanFokus = storageHelper.readJson(DAILY_FOCUS_KEY, null);
 
-    if (sacuvanFokus?.date === danasnjiDatum()) {
-      prikaziDnevniFokus(sacuvanFokus);
-      return;
-    }
-
-    localStorage.removeItem(DAILY_FOCUS_KEY);
-  } catch {
-    prikaziToast("Dnevni fokus nije mogao biti učitan.");
+  if (sacuvanFokus?.date === danasnjiDatum()) {
+    prikaziDnevniFokus(sacuvanFokus);
+    return;
   }
+
+  storageHelper.remove(DAILY_FOCUS_KEY);
 
   prikaziDnevniFokus(null);
 };
@@ -392,49 +414,42 @@ const sacuvajDnevniFokus = (event) => {
     done: fokusZavrsen.checked,
   };
 
-  try {
-    localStorage.setItem(DAILY_FOCUS_KEY, JSON.stringify(fokus));
+  if (storageHelper.writeJson(DAILY_FOCUS_KEY, fokus)) {
     prikaziDnevniFokus(fokus);
     prikaziToast("Dnevni fokus je sačuvan!");
-  } catch {
+  } else {
     prikaziToast("Dnevni fokus nije mogao biti sačuvan.");
   }
 };
 
 const azurirajStatusFokusa = () => {
-  try {
-    const fokus = JSON.parse(localStorage.getItem(DAILY_FOCUS_KEY));
+  const fokus = storageHelper.readJson(DAILY_FOCUS_KEY, null);
 
-    if (fokus?.date === danasnjiDatum()) {
-      fokus.done = fokusZavrsen.checked;
-      localStorage.setItem(DAILY_FOCUS_KEY, JSON.stringify(fokus));
+  if (fokus?.date === danasnjiDatum()) {
+    fokus.done = fokusZavrsen.checked;
+    if (storageHelper.writeJson(DAILY_FOCUS_KEY, fokus)) {
       prikaziDnevniFokus(fokus);
+    } else {
+      prikaziToast("Status fokusa nije mogao biti sačuvan.");
     }
-  } catch {
+  } else {
     prikaziToast("Status fokusa nije mogao biti sačuvan.");
   }
 };
 
 const obrisiDnevniFokus = () => {
-  try {
-    localStorage.removeItem(DAILY_FOCUS_KEY);
+  if (storageHelper.remove(DAILY_FOCUS_KEY)) {
     prikaziDnevniFokus(null);
     prikaziToast("Dnevni fokus je obrisan.");
-  } catch {
+  } else {
     prikaziToast("Dnevni fokus nije mogao biti obrisan.");
   }
 };
 
 const ucitajFilterOmiljenih = () => {
-  try {
-    prikaziSamoOmiljene =
-      JSON.parse(localStorage.getItem(FAVORITES_FILTER_KEY) || "false") ===
-      true;
-    filterOmiljenih.checked = prikaziSamoOmiljene;
-  } catch {
-    prikaziSamoOmiljene = false;
-    filterOmiljenih.checked = false;
-  }
+  prikaziSamoOmiljene =
+    storageHelper.readJson(FAVORITES_FILTER_KEY, false) === true;
+  filterOmiljenih.checked = prikaziSamoOmiljene;
 };
 
 // 6. EVENT LISTENERS
@@ -490,35 +505,25 @@ dugmeTema.addEventListener("click", () => {
 
 // 7. INICIJALIZACIJA (Pokretanje pri učitavanju)
 document.addEventListener("DOMContentLoaded", () => {
-  let sacuvanaTema = "light";
-  try {
-    sacuvanaTema = localStorage.getItem("izabrana-tema") || "light";
-  } catch {
-    // localStorage nije dostupan
-  }
+  const sacuvanaTema = storageHelper.read("izabrana-tema", "light");
   postaviTemu(sacuvanaTema);
   ucitajFilterOmiljenih();
   ucitajDnevniFokus();
   ucitajKorisnickePoruke();
 
-  try {
-    const sacuvanaPoslednjaPoruka = sessionStorage.getItem(LAST_MESSAGE_KEY);
-    if (poruke.includes(sacuvanaPoslednjaPoruka)) {
-      poslednjaPoruka = sacuvanaPoslednjaPoruka;
-    }
-  } catch {
-    // sessionStorage nije dostupan
+  const sacuvanaPoslednjaPoruka = storageHelper.read(
+    LAST_MESSAGE_KEY,
+    null,
+    "session",
+  );
+  if (poruke.includes(sacuvanaPoslednjaPoruka)) {
+    poslednjaPoruka = sacuvanaPoslednjaPoruka;
   }
 });
 
 filterOmiljenih.addEventListener("change", () => {
   prikaziSamoOmiljene = filterOmiljenih.checked;
-  try {
-    localStorage.setItem(
-      FAVORITES_FILTER_KEY,
-      JSON.stringify(prikaziSamoOmiljene),
-    );
-  } catch {
+  if (!storageHelper.writeJson(FAVORITES_FILTER_KEY, prikaziSamoOmiljene)) {
     prikaziToast("Podešavanje filtera nije moglo biti sačuvano.");
   }
   prikaziKorisnickePoruke();
