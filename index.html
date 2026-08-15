@@ -17,8 +17,7 @@
         id="theme-toggle"
         class="icon-only-btn"
         aria-label="Toggle dark mode"
-      >
-      </button>
+      ></button>
       <h1>🌟 Moj Motivator</h1>
       <div id="display-area">
         <p id="poruka">Klikni na dugme za dozu inspiracije!</p>
@@ -27,7 +26,9 @@
       <section class="daily-focus" aria-labelledby="daily-focus-title">
         <h2 id="daily-focus-title">Dnevni fokus</h2>
         <form id="daily-focus-form">
-          <label for="daily-focus-input" class="sr-only">Tvoj fokus za danas</label>
+          <label for="daily-focus-input" class="sr-only"
+            >Tvoj fokus za danas</label
+          >
           <input
             type="text"
             id="daily-focus-input"
@@ -55,6 +56,14 @@
         />
         <button id="add-btn">Dodaj</button>
       </div>
+
+      <section class="user-messages" aria-labelledby="user-messages-title">
+        <h2 id="user-messages-title">Moje poruke</h2>
+        <p id="user-messages-empty" class="user-messages-empty">
+          Još nemaš sačuvanih poruka.
+        </p>
+        <ul id="user-messages-list" class="user-messages-list"></ul>
+      </section>
 
       <button id="generate-btn">Nova Poruka 🚀</button>
     </div>

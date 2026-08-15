@@ -188,6 +188,101 @@ button:active {
   font-size: 0.95rem;
 }
 
+.user-messages {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: var(--bg-display);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  text-align: left;
+}
+
+.user-messages h2 {
+  margin-bottom: 0.75rem;
+  color: var(--text-main);
+  font-size: 1.1rem;
+}
+
+.user-messages-empty {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.user-messages-list {
+  display: grid;
+  gap: 0.65rem;
+  list-style: none;
+}
+
+.user-message-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--bg-app);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+}
+
+.user-message-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--text-main);
+  font-size: 0.9rem;
+}
+
+.message-edit-input {
+  min-width: 0;
+  flex: 1;
+  padding: 0.6rem 0.7rem;
+  background: var(--bg-app);
+  color: var(--text-main);
+  border: 1px solid var(--border-input);
+  border-radius: 8px;
+}
+
+.user-message-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.4rem;
+}
+
+.message-edit-btn,
+.message-delete-btn {
+  width: auto;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+}
+
+.message-edit-btn {
+  background: var(--accent);
+  color: white;
+}
+
+.message-delete-btn {
+  background: transparent;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+}
+
+@media (max-width: 420px) {
+  .user-message-item {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .user-message-actions {
+    width: 100%;
+  }
+
+  .message-edit-btn,
+  .message-delete-btn {
+    flex: 1;
+  }
+}
+
 .focus-complete {
   display: flex;
   align-items: center;
