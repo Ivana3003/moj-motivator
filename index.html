@@ -24,6 +24,27 @@
         <p id="poruka">Klikni na dugme za dozu inspiracije!</p>
       </div>
 
+      <section class="daily-focus" aria-labelledby="daily-focus-title">
+        <h2 id="daily-focus-title">Dnevni fokus</h2>
+        <form id="daily-focus-form">
+          <label for="daily-focus-input" class="sr-only">Tvoj fokus za danas</label>
+          <input
+            type="text"
+            id="daily-focus-input"
+            maxlength="120"
+            placeholder="Šta želiš da postigneš danas?"
+          />
+          <button type="submit" id="daily-focus-save">Sačuvaj fokus</button>
+        </form>
+        <div id="daily-focus-status" class="daily-focus-status" hidden>
+          <span id="daily-focus-text"></span>
+          <label class="focus-complete">
+            <input type="checkbox" id="daily-focus-complete" />
+            Završeno
+          </label>
+        </div>
+      </section>
+
       <div class="input-group">
         <label for="nova-poruka" class="sr-only">Tvoja poruka:</label>
         <input
