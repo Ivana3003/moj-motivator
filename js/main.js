@@ -54,6 +54,7 @@ const prikaziToast = (poruka) => {
 // 4. FUNKCIJA ZA TEMU
 const postaviTemu = (tema) => {
   document.documentElement.setAttribute("data-theme", tema);
+  dugmeTema.setAttribute("aria-pressed", String(tema === "dark"));
 
   // Pamćenje u memoriji
   try {
@@ -238,6 +239,7 @@ const prikaziKorisnickePoruke = () => {
     favoriteButton.type = "button";
     favoriteButton.className = `favorite-btn${jesteOmiljena ? " is-favorite" : ""}`;
     favoriteButton.textContent = jesteOmiljena ? "★" : "☆";
+    favoriteButton.setAttribute("aria-pressed", String(jesteOmiljena));
     favoriteButton.setAttribute(
       "aria-label",
       jesteOmiljena ? "Ukloni iz omiljenih" : "Dodaj u omiljene",
@@ -285,10 +287,7 @@ const promeniOmiljenuPoruku = (poruka) => {
 };
 
 const sacuvajIzmenjenuPoruku = (index, novaPoruka) => {
-  const rezultat = messageLogic.normalizeMessage(
-    novaPoruka,
-    MAX_DUZINA_PORUKE,
-  );
+  const rezultat = messageLogic.normalizeMessage(novaPoruka, MAX_DUZINA_PORUKE);
 
   if (!rezultat.ok) {
     prikaziToast(rezultat.error);
@@ -477,7 +476,7 @@ unosDnevnogFokusa.addEventListener("paste", (event) => {
   }
 });
 
-unosNovePoruke.addEventListener("keypress", (e) => {
+unosNovePoruke.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     dodajNovuPoruku();
   }
