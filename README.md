@@ -2,6 +2,8 @@
 
 Moj Motivator is a browser-based tool for daily focus, personal motivational messages, and short self-reflection. It combines an inspiration generator with the ability to save, edit, delete, and favorite personal messages.
 
+[Live Demo](https://it-moj-motivator.netlify.app/) · [Repository](https://github.com/Ivana3003/moj-motivator)
+
 **Status:** Completed static front-end prototype. The application has no build process, backend, or user accounts.
 
 The user interface and notifications are currently available in Serbian.

@@ -166,7 +166,7 @@ const sacuvajKorisnickePoruke = () => {
 };
 
 const ucitajKorisnickePoruke = () => {
-  const sacuvanePoruke = storageHelper.readJson(USER_MESSAGES_KEY, null);
+  const sacuvanePoruke = storageHelper.readJson(USER_MESSAGES_KEY, []);
   if (Array.isArray(sacuvanePoruke)) {
     korisnickePoruke = sacuvanePoruke.filter(
       (poruka, index, svePoruke) =>
@@ -195,7 +195,7 @@ const sacuvajOmiljenePoruke = () => {
 };
 
 const ucitajOmiljenePoruke = () => {
-  const sacuvaneOmiljene = storageHelper.readJson(USER_FAVORITES_KEY, null);
+  const sacuvaneOmiljene = storageHelper.readJson(USER_FAVORITES_KEY, []);
   if (Array.isArray(sacuvaneOmiljene)) {
     omiljenePoruke = sacuvaneOmiljene.filter(
       (poruka, index, svePoruke) =>
