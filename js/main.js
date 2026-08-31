@@ -1,14 +1,9 @@
 "use strict";
 
 // 1. PODACI
-let poruke = [
-  "Izgleda nemoguće, dokle god se ne završi.",
-  "Ništa nije nemoguće za onoga ko ima volju pokušati.",
-  "Tajna uspeha u životu nije da čovek radi ono što voli, već da voli ono što radi.",
-  "Početna tačka svakog uspeha je želja.",
-];
-
-const podrazumevanePoruke = [...poruke];
+let trenutniJezik = "sr";
+let poruke = [...I18n.translations.sr.defaultMessages];
+let podrazumevanePoruke = [...poruke];
 let korisnickePoruke = [];
 let omiljenePoruke = [];
 let prikaziSamoOmiljene = false;
@@ -20,6 +15,13 @@ const USER_MESSAGES_KEY = "moj-motivator-user-messages";
 const USER_FAVORITES_KEY = "moj-motivator-user-message-favorites";
 const FAVORITES_FILTER_KEY = "moj-motivator-favorites-filter";
 const LAST_MESSAGE_KEY = "moj-motivator-last-message";
+const LANGUAGE_KEY = "moj-motivator-language";
+
+const t = (key, ...args) => {
+  const value =
+    I18n.translations[trenutniJezik]?.[key] ?? I18n.translations.sr[key];
+  return typeof value === "function" ? value(...args) : value;
+};
 
 // 2. SELEKTORI
 const prikazPoruke = document.getElementById("poruka");
@@ -37,6 +39,8 @@ const statusDnevnogFokusa = document.getElementById("daily-focus-status");
 const tekstDnevnogFokusa = document.getElementById("daily-focus-text");
 const fokusZavrsen = document.getElementById("daily-focus-complete");
 const dugmeObrisiDnevniFokus = document.getElementById("daily-focus-delete");
+const dugmeSrpski = document.getElementById("language-sr");
+const dugmeEngleski = document.getElementById("language-en");
 const messageLogic = window.MojMotivatorLogic;
 
 const DAILY_FOCUS_KEY = "moj-motivator-daily-focus";
@@ -102,6 +106,35 @@ const prikaziToast = (poruka) => {
   }, 2500);
 };
 
+const primeniPrevod = () => {
+  document.querySelectorAll("[data-i18n]").forEach((element) => {
+    element.textContent = t(element.dataset.i18n);
+  });
+
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+    element.placeholder = t(element.dataset.i18nPlaceholder);
+  });
+
+  document.querySelectorAll("[data-i18n-aria-label]").forEach((element) => {
+    element.setAttribute("aria-label", t(element.dataset.i18nAriaLabel));
+  });
+};
+
+const postaviJezik = (jezik) => {
+  trenutniJezik = I18n.translations[jezik] ? jezik : "sr";
+  document.documentElement.lang = trenutniJezik;
+  storageHelper.write(LANGUAGE_KEY, trenutniJezik);
+  dugmeSrpski.classList.toggle("active", trenutniJezik === "sr");
+  dugmeEngleski.classList.toggle("active", trenutniJezik === "en");
+  dugmeSrpski.setAttribute("aria-pressed", String(trenutniJezik === "sr"));
+  dugmeEngleski.setAttribute("aria-pressed", String(trenutniJezik === "en"));
+  podrazumevanePoruke = [...t("defaultMessages")];
+  poruke = [...podrazumevanePoruke, ...korisnickePoruke];
+  primeniPrevod();
+  prikazPoruke.textContent = t("introMessage");
+  prikaziKorisnickePoruke();
+};
+
 // 4. FUNKCIJA ZA TEMU
 const postaviTemu = (tema) => {
   document.documentElement.setAttribute("data-theme", tema);
@@ -144,7 +177,7 @@ const dodajNovuPoruku = () => {
   const tekst = rezultat.value;
 
   if (messageLogic.isDuplicateMessage(tekst, poruke)) {
-    prikaziToast("Ova poruka već postoji!");
+    prikaziToast(t("duplicateMessage"));
     return;
   }
 
@@ -154,12 +187,12 @@ const dodajNovuPoruku = () => {
   prikaziKorisnickePoruke();
   unosNovePoruke.value = "";
   prikazPoruke.innerText = tekst;
-  prikaziToast("Poruka uspešno dodata!");
+  prikaziToast(t("messageAdded"));
 };
 
 const sacuvajKorisnickePoruke = () => {
   if (!storageHelper.writeJson(USER_MESSAGES_KEY, korisnickePoruke)) {
-    prikaziToast("Poruke nisu mogle biti sačuvane.");
+    prikaziToast(t("messagesSaveError"));
     return false;
   }
   return true;
@@ -178,7 +211,7 @@ const ucitajKorisnickePoruke = () => {
     poruke = [...podrazumevanePoruke, ...korisnickePoruke];
   } else {
     korisnickePoruke = [];
-    prikaziToast("Sačuvane poruke nisu mogle biti učitane.");
+    prikaziToast(t("messagesLoadError"));
   }
 
   ucitajOmiljenePoruke();
@@ -188,7 +221,7 @@ const ucitajKorisnickePoruke = () => {
 
 const sacuvajOmiljenePoruke = () => {
   if (!storageHelper.writeJson(USER_FAVORITES_KEY, omiljenePoruke)) {
-    prikaziToast("Omiljene poruke nisu mogle biti sačuvane.");
+    prikaziToast(t("favoritesSaveError"));
     return false;
   }
   return true;
@@ -204,7 +237,7 @@ const ucitajOmiljenePoruke = () => {
     );
   } else {
     omiljenePoruke = [];
-    prikaziToast("Omiljene poruke nisu mogle biti učitane.");
+    prikaziToast(t("favoritesLoadError"));
   }
 };
 
@@ -215,8 +248,8 @@ const prikaziKorisnickePoruke = () => {
     : korisnickePoruke;
   praznaListaPoruka.hidden = porukeZaPrikaz.length > 0;
   praznaListaPoruka.textContent = prikaziSamoOmiljene
-    ? "Još nemaš omiljenih poruka."
-    : "Još nemaš sačuvanih poruka.";
+    ? t("emptyFavorites")
+    : t("emptyMessages");
 
   porukeZaPrikaz.forEach((poruka) => {
     const index = korisnickePoruke.indexOf(poruka);
@@ -229,7 +262,7 @@ const prikaziKorisnickePoruke = () => {
       editInput.className = "message-edit-input";
       editInput.maxLength = MAX_DUZINA_PORUKE;
       editInput.value = poruka;
-      editInput.setAttribute("aria-label", "Izmeni poruku");
+      editInput.setAttribute("aria-label", t("editMessage"));
 
       const editActions = document.createElement("div");
       editActions.className = "user-message-actions";
@@ -237,7 +270,7 @@ const prikaziKorisnickePoruke = () => {
       const saveButton = document.createElement("button");
       saveButton.type = "button";
       saveButton.className = "message-edit-btn";
-      saveButton.textContent = "Sačuvaj";
+      saveButton.textContent = t("save");
       saveButton.addEventListener("click", () =>
         sacuvajIzmenjenuPoruku(index, editInput.value),
       );
@@ -245,7 +278,7 @@ const prikaziKorisnickePoruke = () => {
       const cancelButton = document.createElement("button");
       cancelButton.type = "button";
       cancelButton.className = "message-delete-btn";
-      cancelButton.textContent = "Otkaži";
+      cancelButton.textContent = t("cancel");
       cancelButton.addEventListener("click", otkaziIzmenuPoruke);
 
       editActions.append(saveButton, cancelButton);
@@ -270,7 +303,7 @@ const prikaziKorisnickePoruke = () => {
     favoriteButton.setAttribute("aria-pressed", String(jesteOmiljena));
     favoriteButton.setAttribute(
       "aria-label",
-      jesteOmiljena ? "Ukloni iz omiljenih" : "Dodaj u omiljene",
+      jesteOmiljena ? t("removeFavorite") : t("addFavorite"),
     );
     favoriteButton.addEventListener("click", () =>
       promeniOmiljenuPoruku(poruka),
@@ -279,7 +312,7 @@ const prikaziKorisnickePoruke = () => {
     const editButton = document.createElement("button");
     editButton.type = "button";
     editButton.className = "message-edit-btn";
-    editButton.textContent = "Izmeni";
+    editButton.textContent = t("edit");
     editButton.addEventListener("click", () => {
       indeksPorukeZaIzmenu = index;
       prikaziKorisnickePoruke();
@@ -288,7 +321,7 @@ const prikaziKorisnickePoruke = () => {
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.className = "message-delete-btn";
-    deleteButton.textContent = "Obriši";
+    deleteButton.textContent = t("delete");
     deleteButton.addEventListener("click", () => obrisiKorisnickuPoruku(index));
 
     actions.append(favoriteButton, editButton, deleteButton);
@@ -308,8 +341,8 @@ const promeniOmiljenuPoruku = (poruka) => {
     prikaziKorisnickePoruke();
     prikaziToast(
       omiljenePoruke.includes(poruka)
-        ? "Poruka je dodata u omiljene."
-        : "Poruka je uklonjena iz omiljenih.",
+        ? t("favoriteAdded")
+        : t("favoriteRemoved"),
     );
   }
 };
@@ -330,7 +363,7 @@ const sacuvajIzmenjenuPoruku = (index, novaPoruka) => {
   );
 
   if (postojiDuplikat) {
-    prikaziToast("Ova poruka već postoji!");
+    prikaziToast(t("duplicateMessage"));
     return;
   }
 
@@ -347,7 +380,7 @@ const sacuvajIzmenjenuPoruku = (index, novaPoruka) => {
   if (sacuvajKorisnickePoruke() && sacuvajOmiljenePoruke()) {
     indeksPorukeZaIzmenu = null;
     prikaziKorisnickePoruke();
-    prikaziToast("Poruka je izmenjena!");
+    prikaziToast(t("messageUpdated"));
   }
 };
 
@@ -357,7 +390,7 @@ const otkaziIzmenuPoruke = () => {
 };
 
 const obrisiKorisnickuPoruku = (index) => {
-  if (!window.confirm("Da li želiš da obrišeš ovu poruku?")) return;
+  if (!window.confirm(t("deleteMessageConfirm"))) return;
 
   const [obrisanaPoruka] = korisnickePoruke.splice(index, 1);
   omiljenePoruke = omiljenePoruke.filter(
@@ -368,7 +401,7 @@ const obrisiKorisnickuPoruku = (index) => {
 
   if (sacuvajKorisnickePoruke() && sacuvajOmiljenePoruke()) {
     prikaziKorisnickePoruke();
-    prikaziToast("Poruka je obrisana.");
+    prikaziToast(t("messageDeleted"));
   }
 };
 
@@ -401,12 +434,12 @@ const sacuvajDnevniFokus = (event) => {
   const tekst = unosDnevnogFokusa.value.trim();
 
   if (!tekst) {
-    prikaziToast("Unesi fokus za danas.");
+    prikaziToast(t("enterFocus"));
     return;
   }
 
   if (tekst.length > MAX_DUZINA_FOKUSA) {
-    prikaziToast(`Fokus ne sme biti duži od ${MAX_DUZINA_FOKUSA} karaktera.`);
+    prikaziToast(t("focusTooLong", MAX_DUZINA_FOKUSA));
     return;
   }
 
@@ -418,9 +451,9 @@ const sacuvajDnevniFokus = (event) => {
 
   if (storageHelper.writeJson(DAILY_FOCUS_KEY, fokus)) {
     prikaziDnevniFokus(fokus);
-    prikaziToast("Dnevni fokus je sačuvan!");
+    prikaziToast(t("focusSaved"));
   } else {
-    prikaziToast("Dnevni fokus nije mogao biti sačuvan.");
+    prikaziToast(t("focusSaveError"));
   }
 };
 
@@ -432,19 +465,19 @@ const azurirajStatusFokusa = () => {
     if (storageHelper.writeJson(DAILY_FOCUS_KEY, fokus)) {
       prikaziDnevniFokus(fokus);
     } else {
-      prikaziToast("Status fokusa nije mogao biti sačuvan.");
+      prikaziToast(t("focusStatusError"));
     }
   } else {
-    prikaziToast("Status fokusa nije mogao biti sačuvan.");
+    prikaziToast(t("focusStatusError"));
   }
 };
 
 const obrisiDnevniFokus = () => {
   if (storageHelper.remove(DAILY_FOCUS_KEY)) {
     prikaziDnevniFokus(null);
-    prikaziToast("Dnevni fokus je obrisan.");
+    prikaziToast(t("focusDeleted"));
   } else {
-    prikaziToast("Dnevni fokus nije mogao biti obrisan.");
+    prikaziToast(t("focusDeleteError"));
   }
 };
 
@@ -474,7 +507,7 @@ unosDnevnogFokusa.addEventListener("beforeinput", (event) => {
 
   if (nextValue.length > MAX_DUZINA_FOKUSA) {
     event.preventDefault();
-    prikaziToast(`Fokus ne sme biti duži od ${MAX_DUZINA_FOKUSA} karaktera.`);
+    prikaziToast(t("focusTooLong", MAX_DUZINA_FOKUSA));
   }
 });
 
@@ -489,7 +522,7 @@ unosDnevnogFokusa.addEventListener("paste", (event) => {
 
   if (nextValue.length > MAX_DUZINA_FOKUSA) {
     event.preventDefault();
-    prikaziToast(`Fokus ne sme biti duži od ${MAX_DUZINA_FOKUSA} karaktera.`);
+    prikaziToast(t("focusTooLong", MAX_DUZINA_FOKUSA));
   }
 });
 
@@ -504,6 +537,9 @@ dugmeTema.addEventListener("click", () => {
   const novaTema = trenutnaTema === "dark" ? "light" : "dark";
   postaviTemu(novaTema);
 });
+
+dugmeSrpski.addEventListener("click", () => postaviJezik("sr"));
+dugmeEngleski.addEventListener("click", () => postaviJezik("en"));
 
 // 7. INICIJALIZACIJA (Pokretanje pri učitavanju)
 document.addEventListener("DOMContentLoaded", () => {
@@ -521,12 +557,14 @@ document.addEventListener("DOMContentLoaded", () => {
   if (poruke.includes(sacuvanaPoslednjaPoruka)) {
     poslednjaPoruka = sacuvanaPoslednjaPoruka;
   }
+
+  postaviJezik(storageHelper.read(LANGUAGE_KEY, "sr"));
 });
 
 filterOmiljenih.addEventListener("change", () => {
   prikaziSamoOmiljene = filterOmiljenih.checked;
   if (!storageHelper.writeJson(FAVORITES_FILTER_KEY, prikaziSamoOmiljene)) {
-    prikaziToast("Podešavanje filtera nije moglo biti sačuvano.");
+    prikaziToast(t("filterSaveError"));
   }
   prikaziKorisnickePoruke();
 });

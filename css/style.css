@@ -61,6 +61,31 @@ body {
   text-align: center;
 }
 
+.language-switcher {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.language-switcher button {
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0.35rem 0.5rem;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  border-radius: 8px;
+}
+
+.language-switcher button.active {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 h1 {
   color: var(--text-main);
   margin-bottom: 1.5rem;
