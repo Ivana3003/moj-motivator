@@ -6,7 +6,7 @@ Moj Motivator is a browser-based tool for daily focus, personal motivational mes
 
 **Status:** Completed static front-end prototype. The application has no build process, backend, or user accounts.
 
-The user interface and notifications are currently available in Serbian.
+The user interface is available in Serbian and English.
 
 ## 🎯 Why This Project
 
@@ -20,6 +20,7 @@ Moj Motivator was built as a focused personal productivity tool rather than a si
 
 ## ✨ Features
 
+- **Bilingual Interface (i18n):** Switch instantly between Serbian and English, with the selected language persisted across reloads.
 - **Daily Focus:** Save one focus for the current day, mark it as completed, edit it, or delete it.
 - **Message Generator:** Display random motivational messages while avoiding immediate repetition.
 - **Personal Messages:** Add, edit inline, and delete custom motivational messages.
@@ -36,6 +37,7 @@ Moj Motivator was built as a focused personal productivity tool rather than a si
 - **HTML5:** Semantic structure and accessible forms.
 - **CSS3:** CSS custom properties for theming, responsive layout, and `:focus-visible` styles.
 - **Vanilla JavaScript:** DOM interactions, validation, state management, and browser storage.
+- **i18n:** Dictionary-based translation module (`js/i18n.js`) for Serbian and English strings.
 - **Lucide Icons:** Icons loaded through the CDN.
 - **Jest:** Unit tests for the pure message-logic layer.
 
@@ -47,7 +49,9 @@ moj-motivator/
 ├── css/style.css
 ├── js/main.js
 ├── js/message-logic.js
+├── js/i18n.js
 ├── tests/message-logic.test.js
+├── tests/i18n.test.js
 ├── images/
 ├── light-screenshot.png
 ├── dark-screenshot.png
@@ -59,6 +63,7 @@ moj-motivator/
 
 ## ✅ Current Status
 
+- [x] Serbian/English language switcher with persisted selection
 - [x] Daily Focus save, completion, edit, and delete flow
 - [x] Persistent custom messages with inline edit and delete actions
 - [x] Favorites and favorites-only filtering
